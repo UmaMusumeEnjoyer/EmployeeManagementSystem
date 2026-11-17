@@ -1,9 +1,20 @@
 package com.example.employeemanagement.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 public class EmployeeUpdateRequest {
 
+    @NotNull(message = "Name is required")
+    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
     private String name;
+
+    @NotNull(message = "Email is required")
+    @Email(message = "Email must be valid")
     private String email;
+
+    @NotNull(message = "Department is required")
     private String department;
 
     public EmployeeUpdateRequest() {

@@ -3,10 +3,12 @@ package com.example.employeemanagement.controller;
 import com.example.employeemanagement.dto.EmployeeCreateRequest;
 import com.example.employeemanagement.dto.EmployeeDTO;
 import com.example.employeemanagement.dto.EmployeeUpdateRequest;
-import com.example.employeemanagement.service.EmployeeService;
-import com.example.employeemanagement.service.UtilityService;
+import com.example.employeemanagement.exception.ResourceNotFoundException;
 import com.example.employeemanagement.model.Department;
 import com.example.employeemanagement.repository.DepartmentRepository;
+import com.example.employeemanagement.service.EmployeeService;
+import com.example.employeemanagement.service.UtilityService;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,16 +52,16 @@ public class EmployeeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable Long id) {
-        return employeeService.getEmployeeById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        EmployeeDTO employee = employeeService.getEmployeeById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+        return ResponseEntity.ok(employee);
     }
 
     @GetMapping("/code/{code}")
     public ResponseEntity<EmployeeDTO> getEmployeeByCode(@PathVariable String code) {
-        return employeeService.getEmployeeByCode(code)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        EmployeeDTO employee = employeeService.getEmployeeByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with code: " + code));
+        return ResponseEntity.ok(employee);
     }
 
     @GetMapping("/search")
@@ -71,7 +73,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<EmployeeDTO> addEmployee(@RequestBody EmployeeCreateRequest request) {
+    public ResponseEntity<EmployeeDTO> addEmployee(@Valid @RequestBody EmployeeCreateRequest request) {
         EmployeeDTO created = employeeService.createEmployee(request);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -79,20 +81,20 @@ public class EmployeeController {
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeDTO> updateEmployee(
             @PathVariable Long id,
-            @RequestBody EmployeeUpdateRequest request
+            @Valid @RequestBody EmployeeUpdateRequest request
     ) {
-        return employeeService.updateEmployee(id, request)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        EmployeeDTO updated = employeeService.updateEmployee(id, request)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         boolean deleted = employeeService.deleteEmployee(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build();
+        if (!deleted) {
+            throw new ResourceNotFoundException("Employee not found with id: " + id);
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/departments")
