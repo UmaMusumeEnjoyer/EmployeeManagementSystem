@@ -3,14 +3,16 @@ package com.example.employeemanagement.dto;
 public class EmployeeCreateRequest {
 
     private String name;
+    private String email;
     private String department;
     private String password;
 
     public EmployeeCreateRequest() {
     }
 
-    public EmployeeCreateRequest(String name, String department, String password) {
+    public EmployeeCreateRequest(String name, String email, String department, String password) {
         this.name = name;
+        this.email = email;
         this.department = department;
         this.password = password;
     }
@@ -21,6 +23,14 @@ public class EmployeeCreateRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getDepartment() {

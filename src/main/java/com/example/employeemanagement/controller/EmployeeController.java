@@ -2,14 +2,19 @@ package com.example.employeemanagement.controller;
 
 import com.example.employeemanagement.dto.EmployeeCreateRequest;
 import com.example.employeemanagement.dto.EmployeeDTO;
+import com.example.employeemanagement.dto.EmployeeUpdateRequest;
 import com.example.employeemanagement.service.EmployeeService;
 import com.example.employeemanagement.service.UtilityService;
+import com.example.employeemanagement.model.Department;
+import com.example.employeemanagement.repository.DepartmentRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,30 +29,75 @@ public class EmployeeController {
     private final EmployeeService employeeService;
     private final UtilityService utilityService;
     private final ModelMapper modelMapper;
+    private final DepartmentRepository departmentRepository;
 
-    public EmployeeController(EmployeeService employeeService, UtilityService utilityService, ModelMapper modelMapper) {
+    public EmployeeController(
+            EmployeeService employeeService,
+            UtilityService utilityService,
+            ModelMapper modelMapper,
+            DepartmentRepository departmentRepository
+    ) {
         this.employeeService = employeeService;
         this.utilityService = utilityService;
         this.modelMapper = modelMapper;
+        this.departmentRepository = departmentRepository;
     }
 
     @GetMapping
-    public ResponseEntity<List<EmployeeDTO>> getAllEmployees(@RequestParam(required = false) String department) {
-        List<EmployeeDTO> employees = employeeService.getAllEmployees(department);
-        return ResponseEntity.ok(employees);
+    public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
+        return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
-    @GetMapping("/{code}")
+    @GetMapping("/{id}")
+    public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable Long id) {
+        return employeeService.getEmployeeById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/code/{code}")
     public ResponseEntity<EmployeeDTO> getEmployeeByCode(@PathVariable String code) {
         return employeeService.getEmployeeByCode(code)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<EmployeeDTO>> searchEmployees(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String department
+    ) {
+        return ResponseEntity.ok(employeeService.searchEmployees(name, department));
+    }
+
     @PostMapping
     public ResponseEntity<EmployeeDTO> addEmployee(@RequestBody EmployeeCreateRequest request) {
-        EmployeeDTO createdEmployee = employeeService.addEmployee(request);
-        return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
+        EmployeeDTO created = employeeService.createEmployee(request);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EmployeeDTO> updateEmployee(
+            @PathVariable Long id,
+            @RequestBody EmployeeUpdateRequest request
+    ) {
+        return employeeService.updateEmployee(id, request)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        boolean deleted = employeeService.deleteEmployee(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/departments")
+    public ResponseEntity<List<Department>> getAllDepartments() {
+        return ResponseEntity.ok(departmentRepository.findAll());
     }
 
     @GetMapping("/generate-code")
