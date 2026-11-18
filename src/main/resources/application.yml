@@ -3,3 +3,12 @@ spring:
     name: employee-management
   profiles:
     active: dev
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info
+  endpoint:
+    health:
+      show-details: always

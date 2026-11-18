@@ -97,6 +97,11 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/report/total")
+    public ResponseEntity<Long> getTotalEmployees() {
+        return ResponseEntity.ok(employeeService.countTotalEmployees());
+    }
+
     @GetMapping("/departments")
     public ResponseEntity<List<Department>> getAllDepartments() {
         return ResponseEntity.ok(departmentRepository.findAll());
