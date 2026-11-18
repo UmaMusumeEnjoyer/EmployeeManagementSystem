@@ -11,6 +11,7 @@ import jakarta.annotation.PostConstruct;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -154,6 +155,13 @@ public class EmployeeService {
         }
         logger.warn("Employee not found for deletion with id: {}", id);
         return false;
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable("totalEmployeesCount")
+    public long countTotalEmployees() {
+        logger.info("Calculating total employee count from database");
+        return employeeRepository.count();
     }
 
     private EmployeeDTO mapToDTO(Employee employee) {
