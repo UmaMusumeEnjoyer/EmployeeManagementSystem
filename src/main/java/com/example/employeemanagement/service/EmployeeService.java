@@ -9,6 +9,8 @@ import com.example.employeemanagement.repository.DepartmentRepository;
 import com.example.employeemanagement.repository.EmployeeRepository;
 import jakarta.annotation.PostConstruct;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,8 @@ import java.util.Optional;
 @Service
 @Transactional
 public class EmployeeService {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmployeeService.class);
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
@@ -69,6 +73,7 @@ public class EmployeeService {
     }
 
     public EmployeeDTO createEmployee(EmployeeCreateRequest request) {
+        logger.info("Adding new employee with name: {}, department: {}", request.getName(), request.getDepartment());
         String formattedName = utilityService.formatString(request.getName());
         String code = utilityService.generateEmployeeCode();
         String rawPassword = request.getPassword() == null || request.getPassword().isBlank() ? "123456" : request.getPassword();
@@ -87,6 +92,7 @@ public class EmployeeService {
 
         Employee employee = new Employee(code, formattedName, email, encodedPassword, department);
         Employee saved = employeeRepository.save(employee);
+        logger.info("Successfully created employee with id: {}, code: {}", saved.getId(), saved.getCode());
         return mapToDTO(saved);
     }
 
@@ -120,6 +126,7 @@ public class EmployeeService {
     }
 
     public Optional<EmployeeDTO> updateEmployee(Long id, EmployeeUpdateRequest request) {
+        logger.info("Updating employee with id: {}", id);
         return employeeRepository.findById(id).map(employee -> {
             if (request.getName() != null && !request.getName().isBlank()) {
                 employee.setName(utilityService.formatString(request.getName()));
@@ -133,15 +140,19 @@ public class EmployeeService {
                 employee.setDepartment(department);
             }
             Employee updated = employeeRepository.save(employee);
+            logger.info("Successfully updated employee with id: {}", updated.getId());
             return mapToDTO(updated);
         });
     }
 
     public boolean deleteEmployee(Long id) {
+        logger.info("Deleting employee with id: {}", id);
         if (employeeRepository.existsById(id)) {
             employeeRepository.deleteById(id);
+            logger.info("Successfully deleted employee with id: {}", id);
             return true;
         }
+        logger.warn("Employee not found for deletion with id: {}", id);
         return false;
     }
 
