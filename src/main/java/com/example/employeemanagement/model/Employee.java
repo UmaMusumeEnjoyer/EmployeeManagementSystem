@@ -1,5 +1,6 @@
 package com.example.employeemanagement.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +21,8 @@ public class Employee {
     private String code;
     private String name;
     private String email;
+
+    @JsonIgnore
     private String password;
 
     @ManyToOne(fetch = FetchType.LAZY)
