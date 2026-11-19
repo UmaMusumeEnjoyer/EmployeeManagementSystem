@@ -1,7 +1,9 @@
 package com.example.employeemanagement.service;
 
+import com.example.employeemanagement.dto.DepartmentStatisticDTO;
 import com.example.employeemanagement.dto.EmployeeCreateRequest;
 import com.example.employeemanagement.dto.EmployeeDTO;
+import com.example.employeemanagement.dto.EmployeeStatisticsDTO;
 import com.example.employeemanagement.dto.EmployeeUpdateRequest;
 import com.example.employeemanagement.model.Department;
 import com.example.employeemanagement.model.Employee;
@@ -161,7 +163,20 @@ public class EmployeeService {
     @Cacheable("totalEmployeesCount")
     public long countTotalEmployees() {
         logger.info("Calculating total employee count from database");
-        return employeeRepository.count();
+        return employeeRepository.countTotalEmployees();
+    }
+
+    @Transactional(readOnly = true)
+    public List<DepartmentStatisticDTO> getDepartmentStatistics() {
+        logger.info("Fetching employee count grouped by department");
+        return employeeRepository.countEmployeesByDepartment();
+    }
+
+    @Transactional(readOnly = true)
+    public EmployeeStatisticsDTO getOverallStatistics() {
+        long total = countTotalEmployees();
+        List<DepartmentStatisticDTO> departmentStats = getDepartmentStatistics();
+        return new EmployeeStatisticsDTO(total, departmentStats);
     }
 
     private EmployeeDTO mapToDTO(Employee employee) {
