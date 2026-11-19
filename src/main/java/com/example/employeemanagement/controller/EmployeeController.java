@@ -1,7 +1,9 @@
 package com.example.employeemanagement.controller;
 
+import com.example.employeemanagement.dto.DepartmentStatisticDTO;
 import com.example.employeemanagement.dto.EmployeeCreateRequest;
 import com.example.employeemanagement.dto.EmployeeDTO;
+import com.example.employeemanagement.dto.EmployeeStatisticsDTO;
 import com.example.employeemanagement.dto.EmployeeUpdateRequest;
 import com.example.employeemanagement.exception.ResourceNotFoundException;
 import com.example.employeemanagement.model.Department;
@@ -99,6 +101,21 @@ public class EmployeeController {
 
     @GetMapping("/report/total")
     public ResponseEntity<Long> getTotalEmployees() {
+        return ResponseEntity.ok(employeeService.countTotalEmployees());
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<EmployeeStatisticsDTO> getStatistics() {
+        return ResponseEntity.ok(employeeService.getOverallStatistics());
+    }
+
+    @GetMapping("/statistics/departments")
+    public ResponseEntity<List<DepartmentStatisticDTO>> getDepartmentStatistics() {
+        return ResponseEntity.ok(employeeService.getDepartmentStatistics());
+    }
+
+    @GetMapping("/statistics/total")
+    public ResponseEntity<Long> getTotalEmployeesStatistic() {
         return ResponseEntity.ok(employeeService.countTotalEmployees());
     }
 
